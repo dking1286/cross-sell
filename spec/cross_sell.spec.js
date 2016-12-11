@@ -2,64 +2,80 @@ const test = require('tape');
 
 const mongoose = require('mongoose');
 
-const { get, create } = require('../src/interfaces/mongoose_interface')(mongoose);
-const crossSell = require('../src/cross_sell')(get);
+const dbInterface = require('../src/interfaces/mongoose_interface')(mongoose);
+const seed = require('../sample_environment/seed');
+
+const crossSell = require('../src/cross_sell')(dbInterface);
 
 function initializeDB(mongoose) {
   return Promise.all([
     mongoose.model('coffee_machine').remove({}),
     mongoose.model('coffee_pod').remove({}),
-  ]);
+  ]).then(() => seed(mongoose));
 }
 
-test('Interface can access the database', (assert) => {
+
+test('Cross sell identifies correct coffee_pods to match a given machine', (assert) => {
   initializeDB(mongoose)
     .then(() => {
-      return create('coffee_machine', {
-        sku: 'blah',
-        product_type: 'ESPRESSO_MACHINE',
-        water_line_compatible: false,
+      return crossSell({
+        sku: 'CM101',
+        product_type: 'COFFEE_MACHINE_LARGE',
+        style: 'base',
       });
     })
-    .then((created) => {
-      assert.equal(created.sku, 'blah');
-      return get('coffee_machine', {});
-    })
-    .then((found) => {
-      assert.equal(found.length, 1);
-      assert.equal(found[0].sku, 'blah');
+    .then((crossSellItems) => {
+      assert.equal(crossSellItems.length, 5);
 
-      return assert.end();
-    });
+      const actual = crossSellItems
+        .map((item) => {
+          return item.sku;
+        })
+        .sort();
+
+      const expected = [
+        'CP101',
+        'CP111',
+        'CP121',
+        'CP131',
+        'CP141',
+      ];
+
+      assert.deepEqual(actual, expected);
+
+      assert.end();
+    })
+    .catch(error => assert.end(error));
 });
 
-test('Cross sell identifies correct items', (assert) => {
+test('Cross sell identifies correct coffee pods to match another coffee pod', (assert) => {
   initializeDB(mongoose)
-    .then(() => create('coffee_pod', {
-      sku: 'blah',
-      product_type: 'ESPRESSO_POD',
-      coffee_flavor: 'COFFEE_FLAVOR_VANILLA',
-      pack_size: 12,
-    }))
-    .then(created => create('coffee_pod', {
-      sku: 'blah',
-      product_type: 'ESPRESSO_POD',
-      coffee_flavor: 'COFFEE_FLAVOR_VANILLA',
-      pack_size: 36,
-    }))
-    .then(created => crossSell({
-      sku: 'blah',
-      product_type: 'ESPRESSO_POD',
-      coffee_flavor: 'COFFEE_FLAVOR_VANILLA',
-      pack_size: 12,
-    }))
-    .then(crossSellItems => {
-      crossSellItems.forEach(crossSellItem => {
-        assert.equal(crossSellItem.product_type, 'ESPRESSO_POD');
-        assert.equal(crossSellItem.pack_size, 36);
-
-        return assert.end();
+    .then(() => {
+      return crossSell({
+        sku: 'EP003',
+        product_type: 'ESPRESSO_POD',
+        coffee_flavor: 'COFFEE_FLAVOR_VANILLA',
+        pack_size: 36,
       });
+    })
+    .then((crossSellItems) => {
+      assert.equal(crossSellItems.length, 5);
+
+      const actual = crossSellItems
+        .map(item => item.sku)
+        .sort();
+
+      const expected = [
+        'EP005',
+        'EP007',
+        'EP013',
+        'EP015',
+        'EP017',
+      ];
+
+      assert.deepEqual(actual, expected);
+
+      assert.end();
     })
     .catch(error => assert.end(error));
 });
