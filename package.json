@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/dking1286/cross-sell/issues"
   },
-  "homepage": "https://github.com/dking1286/cross-sell#readme"
+  "homepage": "https://github.com/dking1286/cross-sell#readme",
+  "dependencies": {
+    "mongoose": "^4.7.2"
+  }
 }
