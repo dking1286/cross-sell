@@ -1,21 +1,23 @@
-module.exports = (get) => (currentlyViewing) => {
+module.exports = (dbInterface) => (currentlyViewing) => {
   const category = getProductCategory(currentlyViewing);
   const compatibilityType = getCompatibilityType(currentlyViewing);
 
   switch (category) {
     case 'MACHINE':
-      return get('coffee_pod', {
-        product_type: new Regexp(compatibilityType),
+      return dbInterface.get('coffee_pod', {
+        product_type: new RegExp(compatibilityType),
         pack_size: 12,
       });
 
     case 'POD':
-      const otherPackSizes = [12, 36, 60, 84].filter(size =>
-        size !== currentlyViewing.pack_size);
-
-      return get('coffee_pod', {
-        product_type: new RegExp(compatibilityType),
-        pack_size: { $in: otherPackSizes },
+      return dbInterface.get('coffee_pod', {
+        $and: [
+          { product_type: new RegExp(compatibilityType) },
+          { $or: [
+            { pack_size: { $ne: currentlyViewing.pack_size } },
+            { coffee_flavor: { $ne: currentlyViewing.coffee_flavor } },
+          ] },
+        ],
       });
 
     default:
