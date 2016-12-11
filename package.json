@@ -4,11 +4,21 @@
   "description": "A module that suggests cross-sell items for online shopping carts",
   "main": "index.js",
   "scripts": {
-    "test": "better-npm-run test"
+    "test": "better-npm-run test",
+    "seed": "better-npm-run seed"
   },
   "betterScripts": {
     "test": {
-      "command": "node_modules/.bin/tape spec/setup/*.js spec/*.spec.js | faucet"
+      "command": "node_modules/.bin/tape spec/setup/*.js spec/*.spec.js | faucet",
+      "env": {
+        "NODE_ENV": "test"
+      }
+    },
+    "seed": {
+      "command": "node sample_environment/seed_cli.js",
+      "env": {
+        "NODE_ENV": "development"
+      }
     }
   },
   "repository": {
@@ -23,10 +33,11 @@
   },
   "homepage": "https://github.com/dking1286/cross-sell#readme",
   "dependencies": {
-    "better-npm-run": "0.0.13",
-    "mongoose": "^4.7.2"
+    
   },
   "devDependencies": {
+    "better-npm-run": "0.0.13",
+    "mongoose": "^4.7.2",
     "faucet": "0.0.1",
     "tape": "^4.6.3"
   }
