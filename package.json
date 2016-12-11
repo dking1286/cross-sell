@@ -1,0 +1,20 @@
+{
+  "name": "cross-sell",
+  "version": "1.0.0",
+  "description": "A module that suggests cross-sell items for online shopping carts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dking1286/cross-sell.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dking1286/cross-sell/issues"
+  },
+  "homepage": "https://github.com/dking1286/cross-sell#readme"
+}
