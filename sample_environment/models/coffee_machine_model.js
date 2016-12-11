@@ -4,6 +4,7 @@ const coffeeMachineSchema = new mongoose.Schema({
   sku: {
     type: String,
     required: true,
+    unique: true,
   },
 
   product_type: {
