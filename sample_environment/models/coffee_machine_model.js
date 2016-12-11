@@ -17,6 +17,11 @@ const coffeeMachineSchema = new mongoose.Schema({
     ],
   },
 
+  style: {
+    type: String,
+    required: true,
+  },
+
   water_line_compatible: {
     type: Boolean,
     required: true,
