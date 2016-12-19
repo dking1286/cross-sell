@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const dbInterface = require('../src/interfaces/mongoose_interface')(mongoose);
 const seed = require('../sample_environment/seed');
 
-const crossSell = require('../src/cross_sell')(dbInterface);
+const crossSell = require('../src/cross_sell');
 
 function initializeDB(mongoose) {
   return Promise.all([
@@ -18,11 +18,13 @@ function initializeDB(mongoose) {
 test('Cross sell identifies correct coffee_pods to match a given machine', (assert) => {
   initializeDB(mongoose)
     .then(() => {
-      return crossSell({
+      const query = crossSell({
         sku: 'CM101',
         product_type: 'COFFEE_MACHINE_LARGE',
         style: 'base',
       });
+
+      return dbInterface.get(query.collection, query.conditions);
     })
     .then((crossSellItems) => {
       assert.equal(crossSellItems.length, 5);
@@ -51,12 +53,15 @@ test('Cross sell identifies correct coffee_pods to match a given machine', (asse
 test('Cross sell identifies correct coffee pods to match another coffee pod', (assert) => {
   initializeDB(mongoose)
     .then(() => {
-      return crossSell({
+
+      const { collection, conditions } = crossSell({
         sku: 'EP003',
         product_type: 'ESPRESSO_POD',
         coffee_flavor: 'COFFEE_FLAVOR_VANILLA',
         pack_size: 36,
       });
+
+      return dbInterface.get(collection, conditions);
     })
     .then((crossSellItems) => {
       assert.equal(crossSellItems.length, 5);
@@ -79,6 +84,3 @@ test('Cross sell identifies correct coffee pods to match another coffee pod', (a
     })
     .catch(error => assert.end(error));
 });
-
-
-

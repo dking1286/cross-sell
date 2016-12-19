@@ -1,24 +1,30 @@
-module.exports = (dbInterface) => (currentlyViewing) => {
+module.exports = (currentlyViewing) => {
   const category = getProductCategory(currentlyViewing);
   const compatibilityType = getCompatibilityType(currentlyViewing);
 
   switch (category) {
     case 'MACHINE':
-      return dbInterface.get('coffee_pod', {
-        product_type: new RegExp(compatibilityType),
-        pack_size: 12,
-      });
+      return {
+        collection: 'coffee_pod',
+        conditions: {
+          product_type: new RegExp(compatibilityType),
+          pack_size: 12,
+        },
+      };
 
     case 'POD':
-      return dbInterface.get('coffee_pod', {
-        $and: [
-          { product_type: new RegExp(compatibilityType) },
-          { $or: [
-            { pack_size: { $ne: currentlyViewing.pack_size } },
-            { coffee_flavor: { $ne: currentlyViewing.coffee_flavor } },
-          ] },
-        ],
-      });
+      return {
+        collection: 'coffee_pod',
+        conditions: {
+          $and: [
+            { product_type: new RegExp(compatibilityType) },
+            { $or: [
+              { pack_size: { $ne: currentlyViewing.pack_size } },
+              { coffee_flavor: { $ne: currentlyViewing.coffee_flavor } },
+            ] },
+          ],
+        },
+      };
 
     default:
       throw new Error(
